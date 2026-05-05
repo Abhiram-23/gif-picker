@@ -7,6 +7,7 @@ import SkeletonGrid from "./components/SkeletonGrid";
 import Toast from "./components/Toast";
 import "./index.css";
 import Pagination from "./components/Pagination";
+import ToggleTheme from "./components/ToggleTheme";
 
 const ENABLE_FETCH = true;
 
@@ -14,6 +15,10 @@ function App() {
   const [term, setTerm] = useState("");
   const [toast, setToast] = useState(false);
   const [page, setPage] = useState(1);
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("theme") ?? "light";
+  });
+
   const url = window.location;
 
   const {
@@ -25,7 +30,12 @@ function App() {
     fetchGifs,
     fetchTrending,
   } = useGiphy();
+
   const debouncedTerm = useDebounce(term, 400);
+
+  useEffect(() => {
+    document.body.className = theme === "dark" ? "dark-body" : "";
+  }, [theme]);
 
   // read URL on load
   useEffect(() => {
@@ -66,27 +76,29 @@ function App() {
     }, 5000);
   };
 
+  const updateTheme = (newTheme: string) => {
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+  };
+
   return (
-    <div className="app">
+    <div className={`app ${theme === "dark" ? "dark" : ""}`}>
       {/* Header */}
       <div className="app-header">
         <h1>GIF Picker</h1>
         <p>Search for the perfect GIF</p>
+        <ToggleTheme updateTheme={updateTheme} curTheme={theme} />
       </div>
-
       {/* Search */}
       <SearchBar urlQuery={term} onChange={readInput} />
-
       {/* Toast */}
       {toast && <Toast message="GIF URL copied to clipboard!" />}
-
       {/* Rate limit banner */}
       {isRateLimited && (
         <div className="rate-limit-banner">
           ⚠ API limit reached — showing previous results. Try again later.
         </div>
       )}
-
       {/* Error */}
       {error && (
         <div
@@ -100,12 +112,10 @@ function App() {
           ⚠ {error}
         </div>
       )}
-
       {/* Section label */}
       <p className="section-label">
         {term ? `Results for "${term}"` : "Trending"}
       </p>
-
       {/* Grid */}
       {isLoading ? (
         <SkeletonGrid />
@@ -125,7 +135,6 @@ function App() {
           onPageChange={setPage}
         />
       )}
-
       {/* Attribution - required by GIPHY */}
       <p className="giphy-attribution">Powered by GIPHY</p>
     </div>
