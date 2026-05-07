@@ -9,8 +9,6 @@ import "./index.css";
 import Pagination from "./components/Pagination";
 import ToggleTheme from "./components/ToggleTheme";
 
-const ENABLE_FETCH = true;
-
 function App() {
   const [term, setTerm] = useState("");
   const [toast, setToast] = useState(false);
@@ -46,7 +44,6 @@ function App() {
 
   // fetch when term changes
   useEffect(() => {
-    if (!ENABLE_FETCH) return;
     if (debouncedTerm) {
       fetchGifs(debouncedTerm, page);
     } else {
